@@ -7,10 +7,10 @@
 #include "TSDDA.h"
 
 typedef struct EvrNode *EvrPtr;
-typedef struct AirportStruct *AirportStructPtr;
 
 EvrPtr EvrConstruct(int MaxSize);    /* gia erwthma 1 */
 int EvrDestruct(EvrPtr *E);        /* gia erwthma 5 */
+int TSDDA_compare(TStoixeiouDDA s1, TStoixeiouDDA s2);
 
 int EvrInsert(EvrPtr E, TStoixeiouEvr Data); /* gia erwthma 2 */
 int EvrSearch(EvrPtr E, keyType key, int InOut, int *found); /* gia erwthma 3 */

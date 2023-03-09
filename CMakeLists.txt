@@ -3,4 +3,4 @@ project(AirportManagement C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(AirportManagement main.c Evretirio.c)
+add_executable(AirportManagement main.c Evretirio.c RedBlackTreeFunctions.c TSEvr.c)

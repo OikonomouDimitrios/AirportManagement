@@ -3,55 +3,51 @@
 
 #include "RedBlackTreeFunctions.h" /* h Ylopoihsh sas toy R/B */
 
+#define MAXSIZE 7200
 struct EvrNode {
     TStoixeiouEvr *DataArray; /* array of size MaxSize */
     int Index;              /* index of first available element in array */
     RedBlackTree redBlackTree;     /* Root of DDA */
-    AirportStructPtr airportStructPtr;
 } EvrNode;
 
-struct AirportStruct {
-    unsigned int airport_id;
-    unsigned int array_position;
-} AirportStruct;
-
-typedef struct Airport {
-    unsigned int airport_id;
-    char name[256];
-    char city[256];
-    char country[256];
-    char iata[4];
-    char icao[5];
-} Airport;
 
 EvrPtr EvrConstruct(int MaxSize) {
     EvrPtr evrPtr = malloc(sizeof(struct EvrNode));
-    evrPtr->DataArray = malloc(MaxSize * sizeof(Airport));
+    evrPtr->DataArray = malloc(MaxSize * sizeof(TStoixeiouDDA));
     assert(evrPtr->DataArray != NULL);
     evrPtr->Index = 0;
-    evrPtr->redBlackTree = rbt_initialize_tree();
-    evrPtr->airportStructPtr = malloc(MaxSize * sizeof(struct AirportStruct));
-    for (int i = 0; i < MaxSize; i++) {
-        evrPtr->airportStructPtr[i].airport_id = 0;
-        evrPtr->airportStructPtr[i].array_position = i;
-    }
+    evrPtr->redBlackTree = rbt_initialize_tree(
+            (int (*)(const void *, const void *)) TSDDA_compare,
+            (void (*)(const void *, char *, size_t)) integer_type_to_string);
+
     return evrPtr;
 
 }
 
-int Evr_Insert(EvrPtr E, TStoixeiouEvr Data) {}
+int Evr_Insert(EvrPtr E, TStoixeiouEvr Data) {
+    // Get the next available index in DataArray
+    int index = E->Index;
+    if (index >= MAXSIZE) {
+        return -1; // Error: DataArray is full
+    }
+    // Insert the data into the DataArray at the next available index
+    E->DataArray[index] = Data;
+    E->Index++;
+    TStoixeiouDDA *tStoixeiouDda = malloc(sizeof(TStoixeiouDDA));
+tStoixeiouDda->key
+    // Add the data to the red-black tree
+    int error_rbt = 0;
+    rbt_insert_node(&(E->redBlackTree), &E->DataArray[index], &error_rbt);
+    if (error_rbt) {
+        printf("failed to insert into RBT");
+        return -1;
+    }
+
+    return 0;
+}
 
 int EvrSearch(EvrPtr E, keyType key, int InOut, int *found) {}
 
-int AirportStructCompare(const AirportStructPtr a, const AirportStructPtr b) {
-    if (a->airport_id < b->airport_id) {
-        return -1;
-    } else if (a->airport_id > b->airport_id) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
 
 int Evr_PrintAll(EvrPtr E, FILE *out, int *counter) {
 
