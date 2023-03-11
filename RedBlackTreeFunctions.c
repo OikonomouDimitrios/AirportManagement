@@ -59,7 +59,8 @@ Node rbt_initialize_new_node(Node sentinel_node, void *key, Colour colour);
 
 Node rbt_initialize_sentinel();
 
-Node rbt_find_node(Node auxNode, RedBlackTree rbTree, const void *key);
+
+Node rbt_find_node_internal(Node auxNode, RedBlackTree rbTree, const void *key);
 
 void rbt_free_node(Node aux_node);
 
@@ -67,7 +68,7 @@ void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node, int *is_e
 
 void rbt_insert_node(RedBlackTree *redBlackTree, void *value_from_user, int *error) {
     Node nullNode = (*redBlackTree)->sentinel_node;
-    if (rbt_find_node((*redBlackTree)->root, *redBlackTree, value_from_user)) {
+    if (rbt_find_node_internal((*redBlackTree)->root, *redBlackTree, value_from_user)) {
         *error = 1;
         return;
     }
@@ -196,7 +197,7 @@ void rbt_left_rotate(RedBlackTree *redBlackTree, Node aux_node) {
 
 void rbt_delete_node(RedBlackTree *redBlackTree, const void *value_from_user, int *error) {
     Node nullNode = (*redBlackTree)->sentinel_node;
-    Node node_to_be_deleted = rbt_find_node((*redBlackTree)->root, *redBlackTree, value_from_user);
+    Node node_to_be_deleted = rbt_find_node_internal((*redBlackTree)->root, *redBlackTree, value_from_user);
     if (!node_to_be_deleted) {
         *error = 1;
         return;
@@ -300,12 +301,12 @@ Node rbt_tree_minimum(Node aux_node, Node sentinelNode) {
     return aux_node;
 }
 
-Node rbt_find_node(Node auxNode, RedBlackTree rbTree, const void *key) {
+Node rbt_find_node_internal(Node auxNode, RedBlackTree rbTree, const void *key) {
     if (!auxNode || auxNode == (rbTree)->sentinel_node) return NULL;
     int result = rbTree->compare_func(key, (auxNode->key));
     if (result == 0) return auxNode;
-    if (result < 0) return rbt_find_node(auxNode->left, rbTree, key);
-    else return rbt_find_node(auxNode->right, rbTree, key);
+    if (result < 0) return rbt_find_node_internal(auxNode->left, rbTree, key);
+    else return rbt_find_node_internal(auxNode->right, rbTree, key);
 }
 
 void rbt_print_tree(RedBlackTree *redBlackTree, int *is_empty) {
@@ -411,4 +412,13 @@ void rbt_free(RedBlackTree *redBlackTree) {
 void rbt_free_node(Node aux_node) {
     free(aux_node->key);
     free(aux_node);
+}
+
+void * rbt_find_node(RedBlackTree redBlackTree, const void *value_from_user) {
+    void *val = NULL;
+    Node result = rbt_find_node_internal(redBlackTree->root, redBlackTree, value_from_user);
+    if (result != NULL) {
+        return result->key;
+    }
+    return val;
 }

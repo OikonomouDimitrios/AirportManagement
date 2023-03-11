@@ -6,16 +6,18 @@
 typedef struct data {
     /*  members for airport data in array */
     unsigned int airport_id;
-    char name[256];
-    char city[256];
-    char country[256];
-    char iata[4];
-    char icao[5];
+    char *name;
+    char *city;
+    char *country;
+    char *iata;
+    char *icao;
+    int inbound;
+    int outbound;
 } TStoixeiouEvr;
 
 int TSEvr_setValue(TStoixeiouEvr *target, TStoixeiouEvr source);
 
-int TSEvr_readValue(FILE *from, TStoixeiouEvr *Elem);
+int TSEvr_readValue(const FILE *from, TStoixeiouEvr *Elem);
 
 int TSEvr_writeValue(FILE *to, TStoixeiouEvr Elem);
 

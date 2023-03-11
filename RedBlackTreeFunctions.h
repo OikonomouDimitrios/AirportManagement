@@ -99,4 +99,6 @@ void rbt_delete_node(RedBlackTree *redBlackTree, const void *value_from_user, in
  */
 void rbt_free(RedBlackTree *redBlackTree);
 
+void * rbt_find_node(RedBlackTree redBlackTree, const void *value_from_user);
+
 #endif //REDBLACKTREE_REDBLACKTREEFUNCTIONS_H
