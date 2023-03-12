@@ -1,0 +1,53 @@
+-----------------START OF OUTPUT----------------------------
+Total number of flights 7184.
+Time elapsed after inserting 511 entries 0.001847.
+Time elapsed after inserting 1023 entries 0.003776.
+Time elapsed after inserting 2047 entries 0.007007.
+Time elapsed after inserting 4095 entries 0.013206.
+Total insertion time 0.023540
+Total time of search 0.122824.
+Total routes 67290.
+Total inbound/outbound found 132920.
+Not found 1660.
+Mean time of search for each airport 3.507125E-07
+-----------------END OF OUTPUT------------------------------
+-----------------START OF OUTPUT----------------------------
+Total number of flights 7184.
+Time elapsed after inserting 511 entries 0.001746 seconds.
+Time elapsed after inserting 1023 entries 0.003344 seconds.
+Time elapsed after inserting 2047 entries 0.006855 seconds.
+Time elapsed after inserting 4095 entries 0.013768 seconds.
+Total insertion time 0.024726 seconds.
+Total time of search 0.122176 seconds.
+Total routes 67290.
+Total inbound/outbound found 132920.
+Total inbound/outbound not found 1660.
+Mean time of search for each airport 3.502212E-07 seconds.
+-----------------END OF OUTPUT------------------------------
+-----------------START OF OUTPUT----------------------------
+Total number of flights 7184.
+Time elapsed after inserting 511 entries 0.001755 seconds.
+Time elapsed after inserting 1023 entries 0.003419 seconds.
+Time elapsed after inserting 2047 entries 0.010931 seconds.
+Time elapsed after inserting 4095 entries 0.018424 seconds.
+Total insertion time 0.030644 seconds.
+Total search time 0.132053 seconds.
+Total routes 67290.
+Total inbound/outbound found 132920.
+Total inbound/outbound not found 1660.
+Mean time of search for each airport 3.761067E-07 seconds.
+-----------------END OF OUTPUT------------------------------
+-----------------START OF OUTPUT----------------------------
+Total number of flights 7184.
+Time elapsed after inserting 511 entries 0.001830 seconds.
+Time elapsed after inserting 1023 entries 0.003737 seconds.
+Time elapsed after inserting 2047 entries 0.007086 seconds.
+Time elapsed after inserting 4095 entries 0.013515 seconds.
+Total insertion time 0.023991 seconds.
+Total search time 0.128929 seconds.
+Total routes 67290.
+Total inbound/outbound found 132920.
+Total inbound/outbound not found 1660.
+Mean time of search for each found airport 3.678852E-07 seconds.
+Mean time of search for each airport 7.372567E-07 seconds.
+-----------------END OF OUTPUT------------------------------

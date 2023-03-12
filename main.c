@@ -45,10 +45,10 @@ int handle_data_for_Evretirio(EvrPtr evrPtr, char airports_path[], char routes_p
     }
 
     int found = 0, not_found = 0, total_routes = 0;
-    double mean_time_of_random_search = 0, total_time_of_random_search = 0;
+    double mean_time_of_search_for_found_entries = 0, mean_time_of_search_total = 0, total_time_of_search = 0;
     result = Evr_GetRoutesFromFile(evrPtr, routes_path, &found, &not_found, &total_routes,
-                                   &mean_time_of_random_search,
-                                   &total_time_of_random_search);
+                                   &mean_time_of_search_for_found_entries, &mean_time_of_search_total,
+                                   &total_time_of_search);
     if (result == -1) {
         printf("Error: could not open file to get routes.\n");
         return -1;
@@ -56,9 +56,9 @@ int handle_data_for_Evretirio(EvrPtr evrPtr, char airports_path[], char routes_p
 
     result = Evr_WriteResultsToFile(output_path, total_number_of_flights,
                                     airports_random_insertion_times,
-                                    total_random_insertion_time, total_time_of_random_search, total_routes, found,
+                                    total_random_insertion_time, total_time_of_search, total_routes, found,
                                     not_found,
-                                    mean_time_of_random_search);
+                                    mean_time_of_search_for_found_entries, mean_time_of_search_total);
     if (result == -1) {
         printf("Error opening file.\n");
         return -1;

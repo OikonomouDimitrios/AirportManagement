@@ -140,7 +140,8 @@ int Evr_GetFlightsFromFile(EvrPtr E, char file_path[], int *total_number_of_flig
 }
 
 int Evr_GetRoutesFromFile(EvrPtr E, char file_path[], int *total_found, int *total_not_found, int *total_routes,
-                          double *mean_time_of_search, double *total_time_of_search_operation) {
+                          double *mean_time_of_search_for_found_entries, double *mean_time_of_search_for_all_entries,
+                          double *total_time_of_search_operation) {
     FILE *fp = fopen(file_path, "r");
     char line[MAX_LINE_LENGTH];
     if (fp == NULL) {
@@ -150,7 +151,7 @@ int Evr_GetRoutesFromFile(EvrPtr E, char file_path[], int *total_found, int *tot
     LARGE_INTEGER start_time, end_time, start_search_time, end_search_time, frequency;
 
     QueryPerformanceFrequency(&frequency);
-    double totalSearchTime = 0;
+    double totalSearchTimeForFoundEntries = 0, totalSearchTimeForAllEntries = 0;
 
     QueryPerformanceCounter(&start_time);
 
@@ -176,10 +177,10 @@ int Evr_GetRoutesFromFile(EvrPtr E, char file_path[], int *total_found, int *tot
             EvrSearch(E, sourceAirport_int, OUTBOUND, &found);
             QueryPerformanceCounter(&end_search_time);
             if (found) {
-                totalSearchTime += calculateElapsedTime(start_search_time, end_search_time, frequency);
-
+                totalSearchTimeForFoundEntries += calculateElapsedTime(start_search_time, end_search_time, frequency);
                 (*total_found)++;
             } else { (*total_not_found)++; };
+            totalSearchTimeForAllEntries += calculateElapsedTime(start_search_time, end_search_time, frequency);
         }
         if (destinationAirport != NULL) {
             int found = 0;
@@ -188,14 +189,16 @@ int Evr_GetRoutesFromFile(EvrPtr E, char file_path[], int *total_found, int *tot
             EvrSearch(E, destinationAirport_int, INBOUND, &found);
             QueryPerformanceCounter(&end_search_time);
             if (found) {
-                totalSearchTime += calculateElapsedTime(start_search_time, end_search_time, frequency);
+                totalSearchTimeForFoundEntries += calculateElapsedTime(start_search_time, end_search_time, frequency);
                 (*total_found)++;
             } else { (*total_not_found)++; };
+            totalSearchTimeForAllEntries += calculateElapsedTime(start_search_time, end_search_time, frequency);
         }
     }
     QueryPerformanceCounter(&end_time);
 
-    *mean_time_of_search = totalSearchTime / (*total_found);
+    *mean_time_of_search_for_found_entries = totalSearchTimeForFoundEntries / (*total_found);
+    *mean_time_of_search_for_all_entries = totalSearchTimeForAllEntries / (*total_routes);
     *total_time_of_search_operation = calculateElapsedTime(start_time, end_time, frequency);
     fclose(fp);
     return 0;
@@ -207,8 +210,9 @@ double calculateElapsedTime(LARGE_INTEGER start_time, LARGE_INTEGER end_time, LA
 }
 
 int Evr_WriteResultsToFile(char filename[], int total_number_of_flights, double airports_insertion_times[],
-                           double total_insertion_time, double total_time_of_search, int total_routes,
-                           int found, int not_found, double mean_time_of_search) {
+                           double total_insertion_time, double total_time_of_search, int total_routes, int found,
+                           int not_found, double mean_time_of_search_for_found_entries,
+                           double mean_time_of_search_total) {
     // Open the file for appending
     FILE *fp;
     fp = fopen(filename, "a");
@@ -237,9 +241,10 @@ int Evr_WriteResultsToFile(char filename[], int total_number_of_flights, double 
             "Total routes %d.\n"
             "Total inbound/outbound found %d.\n"
             "Total inbound/outbound not found %d.\n"
+            "Mean time of search for each found airport %E seconds.\n"
             "Mean time of search for each airport %E seconds.\n",
             total_time_of_search, total_routes,
-            found, not_found, mean_time_of_search);
+            found, not_found, mean_time_of_search_for_found_entries, mean_time_of_search_total);
 
     fprintf(fp, "-----------------END OF OUTPUT------------------------------\n");
 
