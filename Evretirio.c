@@ -1,7 +1,10 @@
 #include <assert.h>
 #include "Evretirio.h"
+#include <windows.h>
 
 #include "RedBlackTreeFunctions.h" /* h Ylopoihsh sas toy R/B */
+
+double calculateElapsedTime(LARGE_INTEGER start_time, LARGE_INTEGER end_time, LARGE_INTEGER frequency);
 
 struct EvrNode {
     TStoixeiouEvr *DataArray; /* array of size MaxSize */
@@ -46,14 +49,32 @@ int EvrInsert(EvrPtr E, TStoixeiouEvr Data) {
     return 0;
 }
 
-int EvrSearch(EvrPtr E, keyType key, int InOut, int *found) {}
+int EvrSearch(EvrPtr E, keyType key, FlightType InOut, int *found) {
+    TStoixeiouDDA *tStoixeiouDda = rbt_find_node(E->redBlackTree, &key);
+    if (tStoixeiouDda) {
+        *found = 1;
+//        printf("found key %d!\n", key);
+        if (tStoixeiouDda->arrayIndex > MAXSIZE) {
+            return -1;
+        }
+        if (InOut == INBOUND) {
+            E->DataArray[tStoixeiouDda->arrayIndex].inbound++;
+        } else {
+            E->DataArray[tStoixeiouDda->arrayIndex].outbound++;
+        }
+    } else {
+        *found = 0;
+    }
+    return 0;
+
+}
 
 
 int Evr_PrintAll(EvrPtr E, FILE *out, int *counter) {
     rbt_print_tree(&(E->redBlackTree), counter);
 }
 
-int Evr_katastrofi(EvrPtr *E) {
+int Evr_Destruct(EvrPtr *E) {
     rbt_free(&((*E)->redBlackTree));
     for (int i = 0; i < (*E)->Index; i++) {
         free((*E)->DataArray[i].name);
@@ -66,100 +87,119 @@ int Evr_katastrofi(EvrPtr *E) {
     free(E);
 }
 
-int Evr_ReadFromFile(EvrPtr E) {
-    FILE *fp = fopen("../data/airportsWinRandom.txt", "r");
+int Evr_GetFlightsFromFile(EvrPtr E, char file_path[], int *total_number_of_flights, double interval_times[],
+                           double *total_insertion_time) {
+    LARGE_INTEGER start_time, interval_time, end_time, frequency;
+
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+
+    FILE *fp = fopen(file_path, "r");
     char line[MAX_LINE_LENGTH];
     const char delimiter[] = ";\r";
 
     if (fp == NULL) {
-        printf("Error: could not open file\n");
         return -1;
     }
 
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL) {
+        (*total_number_of_flights)++;
+        if (*total_number_of_flights >= 511) {
+            int number_of_iterations[] = {511, 1023, 2047, 4095};
+            int index = -1;
+            for (int i = 0; i < sizeof(number_of_iterations) / sizeof(number_of_iterations[0]); i++) {
+                if (*total_number_of_flights == number_of_iterations[i]) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index >= 0) {
+                QueryPerformanceCounter(&interval_time);
+                interval_times[index] = calculateElapsedTime(start_time, interval_time, frequency);
+            }
+        }
         char *token;
-        TStoixeiouEvr *tStoixeiouEvr = malloc(sizeof(TStoixeiouEvr));
-
+        int field_index = 0;
         token = strtok(line, delimiter);
-//        printf("Field 0: %s\n", token);
-        tStoixeiouEvr->airport_id = atoi(token);
-
-
-        token = strtok(NULL, delimiter);
-        tStoixeiouEvr->name = malloc(strlen(token) + 1);
-        strcpy(tStoixeiouEvr->name, token);
-//        printf("Field 1: %s\n", token);
-
-        token = strtok(NULL, delimiter);
-        tStoixeiouEvr->city = malloc(strlen(token) + 1);
-        strcpy(tStoixeiouEvr->city, token);
-//        printf("Field 2: %s\n", token);
-
-        token = strtok(NULL, delimiter);
-        tStoixeiouEvr->country = malloc(strlen(token) + 1);
-        strcpy(tStoixeiouEvr->country, token);
-//        printf("Field 3: %s\n", token);
-
-        token = strtok(NULL, delimiter);
-        tStoixeiouEvr->iata = malloc(strlen(token) + 1);
-        strcpy(tStoixeiouEvr->iata, token);
-//        printf("Field 4: %s\n", token);
-
-        token = strtok(NULL, delimiter);
-        tStoixeiouEvr->icao = malloc(strlen(token) + 1);
-        strcpy(tStoixeiouEvr->icao, token);
-//        printf("Field 5: %s\n", token);
+        token[strcspn(token, "\n")] = '\0';
+        TStoixeiouEvr *tStoixeiouEvr = malloc(sizeof(TStoixeiouEvr));
+        while (token != NULL && field_index < 6) {
+            token[strcspn(token, "\n")] = '\0';
+            TSEvr_setValuesFromFileParsing(tStoixeiouEvr, field_index, token);
+            field_index++;
+            token = strtok(NULL, delimiter);
+        }
 
         EvrInsert(E, *tStoixeiouEvr);
     }
+    QueryPerformanceCounter(&end_time);
+    *total_insertion_time = calculateElapsedTime(start_time, end_time, frequency);
     fclose(fp);
-    char file_name[] = "../data/routesWin.txt";
-    fp = fopen(file_name, "r");
+}
+
+int Evr_GetRoutesFromFile(EvrPtr E, char file_path[], int *total_found, int *total_not_found, int *total_routes,
+                          double *mean_time_of_search, double *total_time_of_search_operation) {
+    FILE *fp = fopen(file_path, "r");
+    char line[MAX_LINE_LENGTH];
     if (fp == NULL) {
-        printf("Error: could not open file %s\n", file_name);
+        printf("Error: could not open file %s\n", file_path);
         return -1;
     }
+    LARGE_INTEGER start_time, end_time, start_search_time, end_search_time, frequency;
+
+    QueryPerformanceFrequency(&frequency);
+    double totalSearchTime = 0;
+
+    QueryPerformanceCounter(&start_time);
 
     while (fgets(line, sizeof(line), fp) != NULL) {
-        char *sourceAirport;
-        char *destinationAirport;
-        sourceAirport = strtok(line, delimiter);
-        for (int i = 1; i < 4 && sourceAirport != NULL; i++) {
-            sourceAirport = strtok(NULL, delimiter);
-        }
-        for (int i = 1; i < 3 && sourceAirport != NULL; i++) {
-            destinationAirport = strtok(NULL, delimiter);
-        }
-        getchar();
-        if (sourceAirport != NULL) {
-            TStoixeiouDDA *tStoixeiouDda1 = (TStoixeiouDDA *) malloc(sizeof(TStoixeiouDDA));
-            TSDDA_setKey(&(tStoixeiouDda1->key), atoi(sourceAirport));
-            printf("The 4th value is: %s\n", sourceAirport);
-            TStoixeiouDDA *tStoixeiouDda = rbt_find_node(E->redBlackTree, tStoixeiouDda1);
-            if (tStoixeiouDda) {
-                printf("found\n");
-                E->DataArray[tStoixeiouDda->arrayIndex].outbound++;
-                free(tStoixeiouDda1);
-            } else {
-                printf("not found\n");
+        (*total_routes)++;
+        char *token = strtok(line, ";");
+        int i = 0;
+        char *sourceAirport = NULL;
+        char *destinationAirport = NULL;
+        while (token) {
+            i++;
+            if (i == 4) {
+                sourceAirport = token;
+            } else if (i == 6) {
+                destinationAirport = token;
             }
+            token = strtok(NULL, ";");
+        }
+        if (sourceAirport != NULL) {
+            int found = 0;
+            int sourceAirport_int = atoi(sourceAirport);
+            QueryPerformanceCounter(&start_search_time);
+            EvrSearch(E, sourceAirport_int, OUTBOUND, &found);
+            QueryPerformanceCounter(&end_search_time);
+            if (found) {
+                totalSearchTime += calculateElapsedTime(start_search_time, end_search_time, frequency);
+
+                (*total_found)++;
+            } else { (*total_not_found)++; };
         }
         if (destinationAirport != NULL) {
-            TStoixeiouDDA *tStoixeiouDda1 = (TStoixeiouDDA *) malloc(sizeof(TStoixeiouDDA));
-            TSDDA_setKey(&(tStoixeiouDda1->key), atoi(destinationAirport));
-            printf("The 4th value is: %s\n", destinationAirport);
-            TStoixeiouDDA *tStoixeiouDda = rbt_find_node(E->redBlackTree, tStoixeiouDda1);
-            if (tStoixeiouDda) {
-                printf("found\n");
-                E->DataArray[tStoixeiouDda->arrayIndex].inbound++;
-                free(tStoixeiouDda);
-            } else {
-                printf("not found\n");
-            }
+            int found = 0;
+            int destinationAirport_int = atoi(destinationAirport);
+            QueryPerformanceCounter(&start_search_time);
+            EvrSearch(E, destinationAirport_int, INBOUND, &found);
+            QueryPerformanceCounter(&end_search_time);
+            if (found) {
+                totalSearchTime += calculateElapsedTime(start_search_time, end_search_time, frequency);
+                (*total_found)++;
+            } else { (*total_not_found)++; };
         }
     }
+    QueryPerformanceCounter(&end_time);
 
+    *mean_time_of_search = totalSearchTime / (*total_found);
+    *total_time_of_search_operation = calculateElapsedTime(start_time, end_time, frequency);
     fclose(fp);
-//    rbt_find_node(E->redBlackTree,)
+    return 0;
+}
 
+
+double calculateElapsedTime(LARGE_INTEGER start_time, LARGE_INTEGER end_time, LARGE_INTEGER frequency) {
+    return (double) (end_time.QuadPart - start_time.QuadPart) / (double) frequency.QuadPart;
 }

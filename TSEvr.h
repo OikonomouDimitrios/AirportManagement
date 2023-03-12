@@ -21,4 +21,6 @@ int TSEvr_readValue(const FILE *from, TStoixeiouEvr *Elem);
 
 int TSEvr_writeValue(FILE *to, TStoixeiouEvr Elem);
 
+int TSEvr_setValuesFromFileParsing(TStoixeiouEvr *t, int index, char *value);
+
 #endif
