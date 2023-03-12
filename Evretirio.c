@@ -8,6 +8,11 @@
 
 double calculateElapsedTime(LARGE_INTEGER start_time, LARGE_INTEGER end_time, LARGE_INTEGER frequency);
 
+int
+searchAirport(EvrPtr E, char *airport, int direction, int *total_found, int *total_not_found,
+              LARGE_INTEGER frequency,
+              double *totalSearchTimeForFoundEntries, double *totalSearchTimeForAllEntries);
+
 struct EvrNode {
     TStoixeiouEvr *DataArray; /* array of size MaxSize */
     int Index;              /* index of first available element in array */
@@ -15,7 +20,7 @@ struct EvrNode {
 } EvrNode;
 
 
-EvrPtr EvrConstruct(int MaxSize) {
+EvrPtr Evr_Construct(int MaxSize) {
     EvrPtr evrPtr = malloc(sizeof(struct EvrNode));
     evrPtr->DataArray = malloc(MaxSize * sizeof(TStoixeiouDDA));
     assert(evrPtr->DataArray != NULL);
@@ -28,7 +33,7 @@ EvrPtr EvrConstruct(int MaxSize) {
 
 }
 
-int EvrInsert(EvrPtr E, TStoixeiouEvr Data) {
+int Evr_Insert(EvrPtr E, TStoixeiouEvr Data) {
     // Get the next available index in DataArray
     int index = E->Index;
     if (index >= MAXSIZE) {
@@ -132,7 +137,7 @@ int Evr_GetFlightsFromFile(EvrPtr E, char file_path[], int *total_number_of_flig
             token = strtok(NULL, delimiter);
         }
 
-        EvrInsert(E, *tStoixeiouEvr);
+        Evr_Insert(E, *tStoixeiouEvr);
     }
     QueryPerformanceCounter(&end_time);
     *total_insertion_time = calculateElapsedTime(start_time, end_time, frequency);
@@ -148,7 +153,7 @@ int Evr_GetRoutesFromFile(EvrPtr E, char file_path[], int *total_found, int *tot
         printf("Error: could not open file %s\n", file_path);
         return -1;
     }
-    LARGE_INTEGER start_time, end_time, start_search_time, end_search_time, frequency;
+    LARGE_INTEGER start_time, end_time, frequency;
 
     QueryPerformanceFrequency(&frequency);
     double totalSearchTimeForFoundEntries = 0, totalSearchTimeForAllEntries = 0;
@@ -170,29 +175,15 @@ int Evr_GetRoutesFromFile(EvrPtr E, char file_path[], int *total_found, int *tot
             }
             token = strtok(NULL, ";");
         }
-        if (sourceAirport != NULL) {
-            int found = 0;
-            int sourceAirport_int = atoi(sourceAirport);
-            QueryPerformanceCounter(&start_search_time);
-            EvrSearch(E, sourceAirport_int, OUTBOUND, &found);
-            QueryPerformanceCounter(&end_search_time);
-            if (found) {
-                totalSearchTimeForFoundEntries += calculateElapsedTime(start_search_time, end_search_time, frequency);
-                (*total_found)++;
-            } else { (*total_not_found)++; };
-            totalSearchTimeForAllEntries += calculateElapsedTime(start_search_time, end_search_time, frequency);
+        int result = searchAirport(E, sourceAirport, OUTBOUND, total_found, total_not_found, frequency,
+                                   &totalSearchTimeForFoundEntries, &totalSearchTimeForAllEntries);
+        if (result == -1) {
+            return -1;
         }
-        if (destinationAirport != NULL) {
-            int found = 0;
-            int destinationAirport_int = atoi(destinationAirport);
-            QueryPerformanceCounter(&start_search_time);
-            EvrSearch(E, destinationAirport_int, INBOUND, &found);
-            QueryPerformanceCounter(&end_search_time);
-            if (found) {
-                totalSearchTimeForFoundEntries += calculateElapsedTime(start_search_time, end_search_time, frequency);
-                (*total_found)++;
-            } else { (*total_not_found)++; };
-            totalSearchTimeForAllEntries += calculateElapsedTime(start_search_time, end_search_time, frequency);
+        result = searchAirport(E, destinationAirport, INBOUND, total_found, total_not_found, frequency,
+                               &totalSearchTimeForFoundEntries, &totalSearchTimeForAllEntries);
+        if (result == -1) {
+            return -1;
         }
     }
     QueryPerformanceCounter(&end_time);
@@ -202,6 +193,28 @@ int Evr_GetRoutesFromFile(EvrPtr E, char file_path[], int *total_found, int *tot
     *total_time_of_search_operation = calculateElapsedTime(start_time, end_time, frequency);
     fclose(fp);
     return 0;
+}
+
+int searchAirport(EvrPtr E, char *airport, int direction, int *total_found, int *total_not_found,
+                  LARGE_INTEGER frequency,
+                  double *totalSearchTimeForFoundEntries, double *totalSearchTimeForAllEntries) {
+    LARGE_INTEGER start_search_time, end_search_time;
+    if (airport != NULL) {
+        int found = 0;
+        int airport_int = atoi(airport);
+        QueryPerformanceCounter(&start_search_time);
+        EvrSearch(E, airport_int, direction, &found);
+        QueryPerformanceCounter(&end_search_time);
+        if (found) {
+            (*total_found)++;
+            *totalSearchTimeForFoundEntries += calculateElapsedTime(start_search_time, end_search_time, frequency);
+        } else {
+            (*total_not_found)++;
+        }
+        *totalSearchTimeForAllEntries += calculateElapsedTime(start_search_time, end_search_time, frequency);
+        return 0;
+    }
+    return -1;
 }
 
 

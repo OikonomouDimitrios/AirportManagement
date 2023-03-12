@@ -51,3 +51,31 @@ Total inbound/outbound not found 1660.
 Mean time of search for each found airport 2.989490E-07 seconds.
 Mean time of search for each airport 6.014133E-07 seconds.
 -----------------END OF OUTPUT------------------------------
+-----------------START OF OUTPUT----------------------------
+Total number of flights 7184.
+Time elapsed after inserting 511 entries 0.001600 seconds.
+Time elapsed after inserting 1023 entries 0.003115 seconds.
+Time elapsed after inserting 2047 entries 0.006467 seconds.
+Time elapsed after inserting 4095 entries 0.013033 seconds.
+Total insertion time 0.022680 seconds.
+Total search time 0.107282 seconds.
+Total routes 67290.
+Total inbound/outbound found 132920.
+Total inbound/outbound not found 1660.
+Mean time of search for each found airport 2.861804E-07 seconds.
+Mean time of search for each airport 5.741462E-07 seconds.
+-----------------END OF OUTPUT------------------------------
+-----------------START OF OUTPUT----------------------------
+Total number of flights 7184.
+Time elapsed after inserting 511 entries 0.001594 seconds.
+Time elapsed after inserting 1023 entries 0.003241 seconds.
+Time elapsed after inserting 2047 entries 0.006901 seconds.
+Time elapsed after inserting 4095 entries 0.015209 seconds.
+Total insertion time 0.027759 seconds.
+Total search time 0.117597 seconds.
+Total routes 67290.
+Total inbound/outbound found 132920.
+Total inbound/outbound not found 1660.
+Mean time of search for each found airport 3.102159E-07 seconds.
+Mean time of search for each airport 6.235280E-07 seconds.
+-----------------END OF OUTPUT------------------------------

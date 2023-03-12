@@ -16,12 +16,12 @@ int main() {
     char airports_sorted_path[] = "../data/airportsWinSorted.txt";
     char sorted_bst_output_file_path[] = "../output_files/OUTPUTSortedBST.txt";
 
-    EvrPtr E_rnd = EvrConstruct(MAXSIZE);
+    EvrPtr E_rnd = Evr_Construct(MAXSIZE);
     int result = handle_data_for_Evretirio(E_rnd, airports_random_path, routes_file_path, random_bst_output_file_path);
     if (result == -1) {
         printf("error in handling data for evretirio");
     }
-    EvrPtr E_sorted = EvrConstruct(MAXSIZE);
+    EvrPtr E_sorted = Evr_Construct(MAXSIZE);
     result = handle_data_for_Evretirio(E_sorted, airports_sorted_path, routes_file_path, sorted_bst_output_file_path);
     if (result == -1) {
         printf("error in handling data for evretirio");

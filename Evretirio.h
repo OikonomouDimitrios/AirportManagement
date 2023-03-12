@@ -18,10 +18,10 @@ typedef enum {
 
 typedef struct EvrNode *EvrPtr;
 
-EvrPtr EvrConstruct(int MaxSize);    /* gia erwthma 1 */
+EvrPtr Evr_Construct(int MaxSize);    /* gia erwthma 1 */
 int Evr_Destruct(EvrPtr *E);        /* gia erwthma 5 */
 
-int EvrInsert(EvrPtr E, TStoixeiouEvr Data); /* gia erwthma 2 */
+int Evr_Insert(EvrPtr E, TStoixeiouEvr Data); /* gia erwthma 2 */
 int EvrSearch(EvrPtr E, keyType key, FlightType InOut, int *found); /* gia erwthma 3 */
 
 int Evr_GetFlightsFromFile(EvrPtr E, char file_path[], int *total_number_of_flights, double interval_times[],
