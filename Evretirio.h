@@ -31,4 +31,8 @@ int Evr_GetRoutesFromFile(EvrPtr E, char file_path[], int *total_found, int *tot
                           double *mean_time_of_search, double *total_time_of_search_operation);
 
 
+int Evr_WriteResultsToFile(char filename[], int total_number_of_flights, double airports_insertion_times[],
+                           double total_insertion_time, double total_time_of_search, int total_routes,
+                           int found, int not_found, double mean_time_of_search);
+
 #endif

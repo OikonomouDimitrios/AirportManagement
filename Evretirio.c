@@ -1,3 +1,5 @@
+#include <string.h>
+#include <stdio.h>
 #include <assert.h>
 #include "Evretirio.h"
 #include <windows.h>
@@ -84,7 +86,7 @@ int Evr_Destruct(EvrPtr *E) {
         free((*E)->DataArray[i].icao);
     }
     free((*E)->DataArray);
-    free(E);
+    free(*E);
 }
 
 int Evr_GetFlightsFromFile(EvrPtr E, char file_path[], int *total_number_of_flights, double interval_times[],
@@ -202,4 +204,45 @@ int Evr_GetRoutesFromFile(EvrPtr E, char file_path[], int *total_found, int *tot
 
 double calculateElapsedTime(LARGE_INTEGER start_time, LARGE_INTEGER end_time, LARGE_INTEGER frequency) {
     return (double) (end_time.QuadPart - start_time.QuadPart) / (double) frequency.QuadPart;
+}
+
+int Evr_WriteResultsToFile(char filename[], int total_number_of_flights, double airports_insertion_times[],
+                           double total_insertion_time, double total_time_of_search, int total_routes,
+                           int found, int not_found, double mean_time_of_search) {
+    // Open the file for appending
+    FILE *fp;
+    fp = fopen(filename, "a");
+    if (fp == NULL) {
+        printf("Error opening file.\n");
+        return -1;
+    }
+
+    // Write the elapsed time to the file
+    fprintf(fp, "-----------------START OF OUTPUT----------------------------\n");
+    fprintf(fp,
+            "Total number of flights %d.\n"
+            "Time elapsed after inserting 511 entries %lf seconds.\n"
+            "Time elapsed after inserting 1023 entries %lf seconds.\n"
+            "Time elapsed after inserting 2047 entries %lf seconds.\n"
+            "Time elapsed after inserting 4095 entries %lf seconds.\n"
+            "Total insertion time %lf seconds.\n",
+            total_number_of_flights,
+            airports_insertion_times[0],
+            airports_insertion_times[1],
+            airports_insertion_times[2],
+            airports_insertion_times[3],
+            total_insertion_time);
+    fprintf(fp,
+            "Total search time %lf seconds.\n"
+            "Total routes %d.\n"
+            "Total inbound/outbound found %d.\n"
+            "Total inbound/outbound not found %d.\n"
+            "Mean time of search for each airport %E seconds.\n",
+            total_time_of_search, total_routes,
+            found, not_found, mean_time_of_search);
+
+    fprintf(fp, "-----------------END OF OUTPUT------------------------------\n");
+
+    fclose(fp);
+    return 0;
 }
